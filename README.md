@@ -31,9 +31,6 @@ Uygulama açılınca sistem tepsisinde bir simge belirir; pencereyi kapatman
 uygulamayı kapatmaz (indirmeleri yakalayabilmesi için arka planda kalır) —
 tamamen kapatmak için tepsi menüsünden **Çıkış**.
 
-**Taşınabilir sürüm** (kurulum yapmadan, klasörü kopyalayıp çalıştırmak
-için): `server/dist/mini-IDM/mini-IDM.exe`.
-
 **Kaynaktan çalıştırmak istersen** (geliştirme / exe'ye güvenmiyorsan):
 
 ```bash
@@ -108,8 +105,7 @@ mini-idm/
 │   ├── run.py                   sadece sunucu, tarayıcıdan manuel açmak için
 │   ├── cli.py                   sunucusuz tek indirme
 │   ├── installer.iss            Inno Setup kurulum sihirbazı tarifi
-│   ├── dist/mini-IDM/            derlenmiş taşınabilir sürüm (--onedir)
-│   └── dist_installer/mini-IDM-Setup.exe   kurulum sihirbazı (dağıtım için bu)
+│   └── dist_installer/mini-IDM-Setup.exe   kurulum sihirbazı (kuracağın tek exe bu)
 └── extension/                   Chrome MV3 uzantısı
     ├── manifest.json
     ├── background.js            indirme yakalama, sağ tık menüsü, rozet
