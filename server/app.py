@@ -8,8 +8,10 @@ tusuna basmak uygulamayi kapatmaz - IDM'in calisma bicimi bu: indirmeleri
 yakalayabilmesi icin arka planda surekli acik kalmasi gerekiyor. Tamamen
 kapatmak icin tepsi menusunden "Cikis".
 
-Calistir:  pythonw app.py   (konsol penceresi acilmaz)
-           python app.py    (hata ayiklarken konsollu calistirmak icin)
+Calistir:  pythonw app.py            (konsol penceresi acilmaz)
+           pythonw app.py --hidden   (Windows acilisinda: pencere gostermeden,
+                                       sadece tepside baslar)
+           python app.py             (hata ayiklarken konsollu calistirmak icin)
 """
 import os
 import sys
@@ -100,10 +102,13 @@ def main():
     tray = make_tray_icon()
     threading.Thread(target=tray.run, daemon=True).start()
 
+    start_hidden = "--hidden" in sys.argv
+
     window = webview.create_window(
         "mini-IDM",
         f"http://{server.HOST}:{server.PORT}/",
         width=980, height=680, min_size=(640, 420),
+        hidden=start_hidden,
     )
     window.events.closing += on_closing
 

@@ -6,58 +6,61 @@ IDM benzeri, çok bağlantılı indirme yöneticisi + Chrome uzantısı.
 
 ### 1. Masaüstü uygulaması
 
-**Kurulum sihirbazı (önerilen):** `server/dist_installer/mini-IDM-Setup.exe`'yi
-çalıştır. Admin istemez (kullanıcı klasörüne kurulur), Başlat menüsü
-kısayolu ve kaldırma sihirbazı ekler, isteğe bağlı masaüstü simgesi ve
-Windows açılışında otomatik başlatma sunar.
+**Python kaynağından kurulum (önerilen):** Derlenmiş `.exe` yerine bilerek
+bu yol öneriliyor — Windows'un Smart App Control özelliği imzasız/yeni
+derlenmiş `.exe` dosyalarını (bir Inno Setup sihirbazının içine sarılmış
+olsa bile) tamamen engelleyebiliyor ve bunun kullanıcı tarafından
+onaylanabileceği bir istisna mekanizması yok. `pythonw.exe` ile çalıştırmak
+bu sorunu tamamen ortadan kaldırıyor çünkü Python zaten sistemde bilinen/
+güvenilir bir çalıştırılabilir.
 
-Bu installer da imzasız olduğu için Windows SmartScreen bir uyarı
-gösterebilir ("Windows bilgisayarınızı korudu") — açık kaynaklı/imzasız
-programlarda beklenen bir durumdur:
+```powershell
+cd server
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
 
-1. Uyarı penceresinde **"Daha fazla bilgi"** yazısına tıkla
-2. Çıkan **"Yine de çalıştır"** butonuna bas
+Bu script:
+- `requirements.txt` bağımlılıklarını kurar
+- **Başlangıç** klasörüne bir kısayol koyar → her Windows açılışında
+  pencere göstermeden, sadece sistem tepsisinde sessizce başlar
+- **Masaüstüne** "elle aç" kısayolu koyar → pencere görünür açılır
+- Uygulamayı hemen başlatır
 
-*Not:* Ham `--onefile` exe (kendini her açılışta geçici klasöre açan tek
-dosya) Windows'un Smart App Control özelliği tarafından tamamen
-engellenebiliyordu; bu yüzden `--onedir` derleme + Inno Setup kurulum
-sihirbazına geçildi — installer formatı heuristiklerde daha az şüpheli
-görünüyor ve testte Smart App Control'ü sorunsuz geçti. Yine de illa
-engellenirse: **Windows Güvenliği → Uygulama ve tarayıcı denetimi → Smart
-App Control**'den elle onaylaman gerekir (bu özellik bir kez kapatılırsa
-geri açılamaz, bilerek yap).
+Kaldırmak için: `powershell -ExecutionPolicy Bypass -File uninstall.ps1`
 
 Uygulama açılınca sistem tepsisinde bir simge belirir; pencereyi kapatman
 uygulamayı kapatmaz (indirmeleri yakalayabilmesi için arka planda kalır) —
 tamamen kapatmak için tepsi menüsünden **Çıkış**.
 
-**Kaynaktan çalıştırmak istersen** (geliştirme / exe'ye güvenmiyorsan):
+**Manuel çalıştırmak istersen** (script kullanmadan, açılışta otomatik
+başlamadan):
 
 ```bash
 cd server
 pip install -r requirements.txt
-python app.py        # native pencere + sistem tepsisi
+python app.py            # native pencere + sistem tepsisi
+python app.py --hidden   # pencere gizli, sadece tepside baslar
 # veya sadece sunucu, tarayicidan manuel acmak icin:
 python run.py
-```
-
-**Kendin derlemek istersen:**
-
-```bash
-cd server
-pip install pyinstaller
-pyinstaller --name mini-IDM --onedir --windowed --icon mini_idm/app_icon.ico ^
-  --add-data "mini_idm/ui;mini_idm/ui" --add-data "mini_idm/app_icon.ico;mini_idm" ^
-  --add-data "mini_idm/tray_icon.png;mini_idm" ^
-  --collect-all webview --collect-all pystray --collect-all clr_loader app.py
-
-# Inno Setup (jrsoftware.org veya `winget install JRSoftware.InnoSetup`) ile:
-"C:\Users\<kullanıcı>\AppData\Local\Programs\Inno Setup 6\ISCC.exe" installer.iss
 ```
 
 Konsolda (ya da uygulama ilk açıldığında arka planda) bir token basılır,
 aynı zamanda `~/.mini-idm/token` dosyasında durur — Chrome uzantısı bunu
 ister.
+
+<details>
+<summary><code>.exe</code> / kurulum sihirbazı (denendi, bazı sistemlerde çalışmıyor)</summary>
+
+PyInstaller (`--onedir`) + Inno Setup ile bir `mini-IDM-Setup.exe` kurulum
+sihirbazı da üretilebiliyor (`server/installer.iss`). Sihirbazın kendisi
+Smart App Control'ü genelde geçiyor, ama içindeki asıl `mini-IDM.exe`
+imzasız olduğu için yine de engellenebiliyor — installer "kurulumu"
+tamamlıyor ama uygulama açılmıyor. Gerçek çözüm kod imzalama sertifikası
+(ücretli, ör. Sectigo/DigiCert) ya da açık kaynak projeler için ücretsiz
+[SignPath.io](https://signpath.io) (başvuru/inceleme süreci günler-haftalar
+sürebilir). Bu yüzden şu an için Python kaynağından kurulum önerilen yol.
+
+</details>
 
 ### 2. Chrome uzantısı
 
@@ -104,8 +107,8 @@ mini-idm/
 │   ├── app.py                   masaüstü uygulaması (native pencere + tepsi)
 │   ├── run.py                   sadece sunucu, tarayıcıdan manuel açmak için
 │   ├── cli.py                   sunucusuz tek indirme
-│   ├── installer.iss            Inno Setup kurulum sihirbazı tarifi
-│   └── dist_installer/mini-IDM-Setup.exe   kurulum sihirbazı (kuracağın tek exe bu)
+│   ├── install.ps1 / uninstall.ps1   kurulum (Başlangıç + Masaüstü kısayolu)
+│   └── installer.iss            Inno Setup .exe tarifi (opsiyonel, bkz. README)
 └── extension/                   Chrome MV3 uzantısı
     ├── manifest.json
     ├── background.js            indirme yakalama, sağ tık menüsü, rozet
