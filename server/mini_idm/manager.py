@@ -73,6 +73,17 @@ class Manager:
 
     def add(self, url, filename=None, headers=None, connections=None,
             out_dir=None, start=True):
+        # Ayni URL icin zaten bekleyen/inen bir is varsa yeni bir tane
+        # acma - kullanici "tepki vermedi" sanip birden fazla tikladiginda
+        # ayni dosyayi paralel N defa indirmeye baslamamak icin.
+        with self.lock:
+            for jid in self.order:
+                existing = self.jobs.get(jid)
+                if existing and existing.url == url and existing.status in (
+                    Download.PENDING, Download.RUNNING, Download.PAUSED,
+                ):
+                    return existing
+
         job = Download(
             url=url,
             out_dir=out_dir or resolve_out_dir(self.config, url, filename),
