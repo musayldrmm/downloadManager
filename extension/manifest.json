@@ -6,6 +6,13 @@
   "permissions": ["downloads", "storage", "cookies", "contextMenus", "notifications", "alarms"],
   "host_permissions": ["http://127.0.0.1:9614/*", "<all_urls>"],
   "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["http://127.0.0.1:9614/*"],
+      "js": ["content_bridge.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }

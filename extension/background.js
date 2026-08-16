@@ -130,6 +130,20 @@ chrome.downloads.onCreated.addListener((item) => {
   handleDownload(item).catch(() => {});
 });
 
+// ------------------------------------------------------------- otomatik eslesme
+// content_bridge.js, mini-IDM web arayuzunu (127.0.0.1:9614) her acista
+// token'i buradan gonderir. Kullanici hicbir sey kopyalamadan eslesme olur.
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg && msg.type === "mini-idm-pair" && msg.token) {
+    chrome.storage.local.set({ token: msg.token, enabled: true }, () => {
+      updateBadge();
+      sendResponse({ ok: true });
+    });
+    return true; // async sendResponse
+  }
+});
+
 // ------------------------------------------------------------- sag tik menusu
 
 chrome.runtime.onInstalled.addListener(() => {

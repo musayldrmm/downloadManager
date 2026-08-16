@@ -67,8 +67,14 @@ sürebilir). Bu yüzden şu an için Python kaynağından kurulum önerilen yol.
 1. Chrome'da `chrome://extensions` adresine git
 2. Sağ üstten **Geliştirici modu**'nu aç
 3. **Paketlenmemiş öğe yükle** → bu depodaki `extension/` klasörünü seç
-4. Uzantı ikonuna tıkla → **Ayarlar** → sunucu konsolundaki token'ı yapıştır →
-   **Bağlantıyı test et**
+   (ya da [Releases](../../releases) sayfasından `mini-idm-extension.zip`'i
+   indirip aç)
+4. `http://127.0.0.1:9614/` adresini Chrome'da bir kez aç — uzantı token'ı
+   sayfadan otomatik okuyup kendini eşler, elle bir şey kopyalaman gerekmez
+
+Eşleşme başarılı olduysa uzantı ikonuna tıklayınca yeşil bir nokta görürsün.
+Otomatik eşleşme çalışmazsa (ör. sayfayı hiç açmadıysan) uzantı ikonu →
+**Ayarlar**'dan token'ı elle yapıştırıp **Bağlantıyı test et** diyebilirsin.
 
 Bundan sonra tarayıcıda tıkladığın her indirme (varsayılan: 1 MB üzeri, tür
 sınırı yok) mini-IDM'e yönlenir. Sunucu kapalıyken hiçbir şey yakalanmaz,

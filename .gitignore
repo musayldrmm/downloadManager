@@ -15,3 +15,6 @@ server/dist_installer/
 
 .DS_Store
 Thumbs.db
+
+# Dagitim paketi - kaynak zaten repoda, indirilebilir surum GitHub Releases'te.
+mini-idm-extension.zip
