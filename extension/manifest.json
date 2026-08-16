@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "mini-IDM",
+  "version": "0.1.0",
+  "description": "Tarayici indirmelerini yakalayip mini-IDM'e (127.0.0.1:9614) yonlendirir; cok baglantili, duraklatilabilir indirme.",
+  "permissions": ["downloads", "storage", "cookies", "contextMenus", "notifications", "alarms"],
+  "host_permissions": ["http://127.0.0.1:9614/*", "<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+  },
+  "options_page": "options.html",
+  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+}

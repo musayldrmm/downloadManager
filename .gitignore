@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+
+# PyInstaller derleme ciktilari - buyuk binary, repoya girmemeli.
+# Yayinlar icin GitHub Releases kullanilacak.
+server/build/
+server/dist/
+server/dist_installer/
+
+# yerel indirme motorunun token/config'i proje disinda (~/.mini-idm) tutuluyor,
+# yine de olur da birisi yanlislikla buraya koyarsa yakalansin diye:
+.mini-idm/
+*.token
+
+.DS_Store
+Thumbs.db

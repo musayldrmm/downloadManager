@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>mini-IDM</title>
+<style>
+  :root{
+    --bg:#15171c; --panel:#1c1f26; --panel2:#22262f; --border:#2c313c;
+    --text:#e6e8ec; --muted:#8a8f9c; --accent:#4f8cff; --accent2:#3a6fd6;
+    --ok:#3ecf8e; --err:#e05a5a; --track:#2a2e38;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; width:300px; background:var(--bg); color:var(--text);
+    font:13px/1.4 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  header{
+    display:flex; align-items:center; gap:8px; padding:12px 14px;
+    border-bottom:1px solid var(--border);
+  }
+  header h1{font-size:14px; margin:0; font-weight:600; flex:1;}
+  header h1 span{color:var(--accent);}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--muted); flex-shrink:0;}
+  .dot.ok{background:var(--ok);}
+  .dot.err{background:var(--err);}
+
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; border-bottom:1px solid var(--border);
+  }
+  .switch{position:relative; width:36px; height:20px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{
+    position:absolute; inset:0; background:var(--track); border-radius:20px;
+    cursor:pointer; transition:.2s;
+  }
+  .slider::before{
+    content:""; position:absolute; width:16px; height:16px; left:2px; top:2px;
+    background:#fff; border-radius:50%; transition:.2s;
+  }
+  input:checked + .slider{background:var(--accent);}
+  input:checked + .slider::before{transform:translateX(16px);}
+
+  main{padding:10px 14px; max-height:260px; overflow-y:auto;}
+  .empty{color:var(--muted); text-align:center; padding:20px 0; font-size:12px;}
+
+  .job{margin-bottom:10px;}
+  .job:last-child{margin-bottom:0;}
+  .job-name{
+    font-size:12px; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; margin-bottom:4px;
+  }
+  .job-bar{height:5px; border-radius:3px; background:var(--track); overflow:hidden; margin-bottom:3px;}
+  .job-fill{height:100%; background:var(--accent);}
+  .job-meta{display:flex; justify-content:space-between; color:var(--muted); font-size:11px;}
+
+  footer{padding:10px 14px; border-top:1px solid var(--border); display:flex; gap:8px;}
+  footer button{
+    flex:1; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:6px; padding:8px; font-size:12px; cursor:pointer;
+  }
+  footer button:hover{border-color:var(--accent);}
+  footer button.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  footer button.primary:hover{background:var(--accent2);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>mini-<span>IDM</span></h1>
+  <span class="dot" id="statusDot" title="sunucu durumu"></span>
+</header>
+
+<div class="toggle-row">
+  <span>Yakalama etkin</span>
+  <label class="switch">
+    <input type="checkbox" id="enabledToggle">
+    <span class="slider"></span>
+  </label>
+</div>
+
+<main id="jobList">
+  <div class="empty">Yükleniyor...</div>
+</main>
+
+<footer>
+  <button id="optionsBtn">Ayarlar</button>
+  <button id="openBtn" class="primary">Arayüzü aç</button>
+</footer>
+
+<script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mini-IDM</title>
+<style>
+  :root{
+    --bg:#15171c; --panel:#1c1f26; --panel2:#22262f; --border:#2c313c;
+    --text:#e6e8ec; --muted:#8a8f9c; --accent:#4f8cff; --accent2:#3a6fd6;
+    --ok:#3ecf8e; --warn:#e0a83e; --err:#e05a5a; --track:#2a2e38;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font:14px/1.4 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  header{
+    position:sticky; top:0; z-index:10;
+    background:var(--panel); border-bottom:1px solid var(--border);
+    padding:12px 20px; display:flex; align-items:center; gap:16px;
+  }
+  header h1{font-size:16px; margin:0; font-weight:600; white-space:nowrap;}
+  header h1 span{color:var(--accent);}
+  .total-speed{color:var(--muted); font-size:13px; white-space:nowrap;}
+  .total-speed b{color:var(--ok); font-weight:600;}
+  header .spacer{flex:1;}
+  .icon-btn{
+    background:transparent; border:1px solid var(--border); color:var(--text);
+    border-radius:6px; padding:7px 10px; cursor:pointer; font-size:13px;
+  }
+  .icon-btn:hover{background:var(--panel2);}
+
+  main{max-width:920px; margin:0 auto; padding:20px;}
+
+  .addbox{
+    display:flex; gap:8px; margin-bottom:16px;
+  }
+  .addbox input[type=text]{
+    flex:1; background:var(--panel); border:1px solid var(--border);
+    color:var(--text); border-radius:6px; padding:10px 12px; font-size:14px;
+  }
+  .addbox input[type=text]:focus{outline:none; border-color:var(--accent);}
+  .addbox button{
+    background:var(--accent); border:none; color:#fff; border-radius:6px;
+    padding:0 20px; font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .addbox button:hover{background:var(--accent2);}
+  .addbox button:disabled{opacity:.5; cursor:default;}
+
+  .savebox{display:flex; gap:8px; margin-bottom:16px;}
+  .savebox input{
+    flex:1; background:var(--panel); border:1px solid var(--border);
+    color:var(--muted); border-radius:6px; padding:8px 12px; font-size:13px;
+  }
+
+  .settings{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:16px; margin-bottom:16px; display:none;
+  }
+  .settings.open{display:block;}
+  .settings .grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px; margin-bottom:12px;
+  }
+  .field label{display:block; color:var(--muted); font-size:12px; margin-bottom:4px;}
+  .field input{
+    width:100%; background:var(--panel2); border:1px solid var(--border);
+    color:var(--text); border-radius:6px; padding:8px 10px; font-size:13px;
+  }
+  .field input:focus{outline:none; border-color:var(--accent);}
+  .settings-save{
+    background:var(--accent); border:none; color:#fff; border-radius:6px;
+    padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .settings-save:hover{background:var(--accent2);}
+
+  .pathfield{display:flex; gap:6px;}
+  .pathfield input{flex:1;}
+
+  .cat-title{
+    color:var(--muted); font-size:12px; text-transform:uppercase;
+    letter-spacing:.03em; margin:16px 0 10px; padding-top:12px;
+    border-top:1px solid var(--border);
+  }
+  .cat-grid{display:flex; flex-direction:column; gap:10px; margin-bottom:14px;}
+  .cat-row{display:flex; align-items:center; gap:10px;}
+  .cat-row .cat-label{
+    width:110px; flex-shrink:0; font-size:13px; color:var(--text);
+  }
+  .cat-row .cat-exts{
+    color:var(--muted); font-size:11px; width:150px; flex-shrink:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .cat-row input{
+    flex:1; background:var(--panel2); border:1px solid var(--border);
+    color:var(--text); border-radius:6px; padding:7px 10px; font-size:13px;
+  }
+  .cat-row input:focus{outline:none; border-color:var(--accent);}
+
+  .empty{
+    color:var(--muted); text-align:center; padding:60px 20px; font-size:14px;
+  }
+
+  .job{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:14px 16px; margin-bottom:10px;
+  }
+  .job-top{
+    display:flex; align-items:center; gap:10px; margin-bottom:8px;
+  }
+  .job-name{
+    font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    flex:1; min-width:0;
+  }
+  .badge{
+    font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600;
+    white-space:nowrap; text-transform:uppercase; letter-spacing:.02em;
+  }
+  .badge.running{background:rgba(79,140,255,.15); color:var(--accent);}
+  .badge.pending{background:rgba(138,143,156,.15); color:var(--muted);}
+  .badge.paused{background:rgba(224,168,62,.15); color:var(--warn);}
+  .badge.done{background:rgba(62,207,142,.15); color:var(--ok);}
+  .badge.error{background:rgba(224,90,90,.15); color:var(--err);}
+
+  .segbar{
+    display:flex; height:10px; border-radius:5px; overflow:hidden;
+    background:var(--track); margin-bottom:8px; gap:1px;
+  }
+  .seg{height:100%; background:var(--track); position:relative;}
+  .seg-fill{height:100%; background:var(--accent); transition:width .3s;}
+  .job.done .seg-fill{background:var(--ok);}
+  .job.error .seg-fill{background:var(--err);}
+
+  .job-meta{
+    display:flex; align-items:center; gap:14px; color:var(--muted); font-size:12px;
+    flex-wrap:wrap;
+  }
+  .job-meta .pct{color:var(--text); font-weight:600; font-size:13px;}
+  .job-meta .err-msg{color:var(--err);}
+  .job-meta .spacer{flex:1;}
+
+  .job-actions{display:flex; gap:6px;}
+  .job-actions button{
+    background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:5px; padding:5px 10px; font-size:12px; cursor:pointer;
+  }
+  .job-actions button:hover{border-color:var(--accent);}
+  .job-actions button.danger:hover{border-color:var(--err); color:var(--err);}
+
+  ::placeholder{color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>mini-<span>IDM</span></h1>
+  <div class="total-speed">Toplam hız: <b id="totalSpeed">0 B/s</b></div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="clearBtn">Bitmişleri temizle</button>
+  <button class="icon-btn" id="settingsBtn">Ayarlar</button>
+</header>
+
+<main>
+  <form class="addbox" id="addForm">
+    <input type="text" id="urlInput" placeholder="İndirme linkini yapıştır (http:// veya https://)" autocomplete="off">
+    <button type="submit" id="addBtn">İndir</button>
+  </form>
+  <div class="savebox">
+    <input type="text" id="urlOutDir" placeholder="Kayıt klasörü: otomatik (dosya türüne göre)" readonly>
+    <button type="button" class="icon-btn" data-browse="urlOutDir">Gözat</button>
+  </div>
+
+  <div class="settings" id="settingsPanel">
+    <div class="grid">
+      <div class="field">
+        <label>Varsayılan klasör (diğer / eşleşmeyen türler)</label>
+        <div class="pathfield">
+          <input type="text" id="cfgOutDir">
+          <button type="button" class="icon-btn" data-browse="cfgOutDir">Gözat</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Bağlantı sayısı (dosya başına)</label>
+        <input type="number" id="cfgConnections" min="1" max="32">
+      </div>
+      <div class="field">
+        <label>Eşzamanlı iş sayısı</label>
+        <input type="number" id="cfgMaxConcurrent" min="1" max="20">
+      </div>
+      <div class="field">
+        <label>Hız limiti (Mbps, 0 = sınırsız)</label>
+        <input type="number" id="cfgSpeedLimit" min="0">
+      </div>
+    </div>
+
+    <div class="cat-title">Dosya türüne göre klasörler</div>
+    <div class="cat-grid" id="categoryFields"></div>
+
+    <button class="settings-save" id="cfgSaveBtn">Kaydet</button>
+  </div>
+
+  <div id="jobList"></div>
+</main>
+
+<script>
+const TOKEN = "__TOKEN__";
+const API = "";
+
+function api(path, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({"X-Token": TOKEN, "Content-Type": "application/json"}, opts.headers || {});
+  return fetch(API + path, opts).then(r => r.json());
+}
+
+function fmtBytes(n) {
+  if (!n || n < 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let i = 0;
+  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+  return (i === 0 ? n.toFixed(0) : n.toFixed(1)) + " " + units[i];
+}
+
+function fmtMbps(bytesPerSec) {
+  const bits = Math.max(bytesPerSec || 0, 0) * 8;
+  if (bits < 1e3) return bits.toFixed(0) + " bps";
+  if (bits < 1e6) return (bits / 1e3).toFixed(0) + " Kbps";
+  if (bits < 1e9) return (bits / 1e6).toFixed(1) + " Mbps";
+  return (bits / 1e9).toFixed(2) + " Gbps";
+}
+
+function fmtEta(sec) {
+  if (sec == null || sec < 0 || !isFinite(sec)) return "--:--";
+  sec = Math.round(sec);
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  const mm = (h > 0 ? String(m).padStart(2, "0") : String(m)).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+const STATUS_LABEL = {
+  pending: "Bekliyor", running: "İniyor", paused: "Duraklatıldı",
+  done: "Tamamlandı", error: "Hata",
+};
+
+function segmentBar(job) {
+  const segs = job.segments || [];
+  if (!segs.length) return '<div class="segbar"></div>';
+  const total = job.size || segs.reduce((a, s) => a + s.total, 0) || 1;
+  const parts = segs.map(s => {
+    const width = Math.max((s.total / total) * 100, 0.3);
+    const fillPct = s.total > 0 ? Math.min((s.done / s.total) * 100, 100) : 100;
+    return `<div class="seg" style="width:${width}%">
+      <div class="seg-fill" style="width:${fillPct}%"></div>
+    </div>`;
+  });
+  return `<div class="segbar">${parts.join("")}</div>`;
+}
+
+function jobActions(job) {
+  const btns = [];
+  if (job.status === "running") {
+    btns.push(`<button data-act="pause">Duraklat</button>`);
+  } else if (job.status === "paused" || job.status === "error") {
+    btns.push(`<button data-act="resume">Devam</button>`);
+  }
+  if (job.status !== "done") {
+    btns.push(`<button data-act="cancel" class="danger">İptal</button>`);
+  }
+  btns.push(`<button data-act="remove" class="danger">Sil</button>`);
+  return btns.join("");
+}
+
+function renderJob(job) {
+  const meta = job.status === "error"
+    ? `<span class="err-msg">${job.error || "Hata"}</span>`
+    : `<span>${fmtBytes(job.downloaded)} / ${fmtBytes(job.size)}</span>
+       <span>${fmtMbps(job.speed)}</span>
+       <span>ETA ${fmtEta(job.eta)}</span>
+       <span>${job.connections} bağlantı</span>`;
+
+  return `
+    <div class="job ${job.status}" data-id="${job.id}">
+      <div class="job-top">
+        <div class="job-name" title="${job.filename}">${job.filename}</div>
+        <span class="badge ${job.status}">${STATUS_LABEL[job.status] || job.status}</span>
+      </div>
+      ${segmentBar(job)}
+      <div class="job-meta">
+        <span class="pct">${job.percent.toFixed(1)}%</span>
+        ${meta}
+        <span class="spacer"></span>
+        <div class="job-actions">${jobActions(job)}</div>
+      </div>
+    </div>`;
+}
+
+let jobListEl = document.getElementById("jobList");
+
+function render(state) {
+  const jobs = state.jobs || [];
+  document.getElementById("totalSpeed").textContent = fmtMbps(state.total_speed || 0);
+
+  if (!jobs.length) {
+    jobListEl.innerHTML = '<div class="empty">Henüz indirme yok. Yukarıya bir link yapıştır.</div>';
+    return;
+  }
+  jobListEl.innerHTML = jobs.map(renderJob).join("");
+}
+
+async function poll() {
+  try {
+    const state = await api("/api/status");
+    if (!state.error) render(state);
+  } catch (e) { /* sunucu gecici olarak erisilemez olabilir */ }
+}
+
+jobListEl.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const id = btn.closest(".job").dataset.id;
+  const act = btn.dataset.act;
+  api(`/api/${act}`, { method: "POST", body: JSON.stringify({ id }) }).then(poll);
+});
+
+document.getElementById("addForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = document.getElementById("urlInput");
+  const outDirInput = document.getElementById("urlOutDir");
+  const url = input.value.trim();
+  if (!url) return;
+  const btn = document.getElementById("addBtn");
+  btn.disabled = true;
+  api("/api/add", { method: "POST", body: JSON.stringify({ url, out_dir: outDirInput.value.trim() }) })
+    .then((res) => {
+      if (res.ok) { input.value = ""; outDirInput.value = ""; poll(); }
+      else { alert(res.error || "Eklenemedi"); }
+    })
+    .finally(() => { btn.disabled = false; });
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  api("/api/clear", { method: "POST" }).then(poll);
+});
+
+const settingsPanel = document.getElementById("settingsPanel");
+document.getElementById("settingsBtn").addEventListener("click", () => {
+  settingsPanel.classList.toggle("open");
+});
+
+// Sunucu tarafinda native "klasor sec" penceresi acar (web sayfasi diske
+// dogrudan erisemez). Hem ayarlardaki hem ekleme kutusundaki Gozat butonlari
+// bunu kullanir.
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-browse]");
+  if (!btn) return;
+  const target = document.getElementById(btn.dataset.browse);
+  const prevLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "...";
+  try {
+    const res = await api(`/api/browse-folder?start=${encodeURIComponent(target.value || "")}`);
+    if (res.ok && res.path) target.value = res.path;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = prevLabel;
+  }
+});
+
+let categories = {};
+
+function renderCategoryFields() {
+  const wrap = document.getElementById("categoryFields");
+  wrap.innerHTML = Object.entries(categories).map(([key, cat]) => `
+    <div class="cat-row" data-cat="${key}">
+      <span class="cat-label">${cat.label}</span>
+      <span class="cat-exts" title="${(cat.exts || []).join(', ')}">${(cat.exts || []).join(', ')}</span>
+      <input type="text" class="cat-dir" placeholder="Otomatik: klasör/${cat.label}">
+      <button type="button" class="icon-btn" data-browse="cd-${key}">Gözat</button>
+    </div>`).join("");
+  // input id'lerini data-browse ile eslestirmek icin ayri ata (template literal icinde id cakismasini onlemek icin)
+  wrap.querySelectorAll(".cat-row").forEach((row) => {
+    const key = row.dataset.cat;
+    const input = row.querySelector(".cat-dir");
+    input.id = `cd-${key}`;
+    input.value = categories[key].dir || "";
+  });
+}
+
+function fillSettings(cfg) {
+  document.getElementById("cfgOutDir").value = cfg.out_dir || "";
+  document.getElementById("cfgConnections").value = cfg.connections || 8;
+  document.getElementById("cfgMaxConcurrent").value = cfg.max_concurrent || 3;
+  // dahili birim byte/s; kullaniciya Mbps goster (1 Mbps = 125000 byte/s)
+  document.getElementById("cfgSpeedLimit").value = cfg.speed_limit ? Math.round(cfg.speed_limit / 125000) : 0;
+  categories = JSON.parse(JSON.stringify(cfg.categories || {}));
+  renderCategoryFields();
+}
+
+document.getElementById("cfgSaveBtn").addEventListener("click", () => {
+  document.querySelectorAll("#categoryFields .cat-row").forEach((row) => {
+    const key = row.dataset.cat;
+    categories[key].dir = row.querySelector(".cat-dir").value.trim();
+  });
+  const patch = {
+    out_dir: document.getElementById("cfgOutDir").value.trim(),
+    connections: parseInt(document.getElementById("cfgConnections").value, 10) || 8,
+    max_concurrent: parseInt(document.getElementById("cfgMaxConcurrent").value, 10) || 3,
+    speed_limit: (parseInt(document.getElementById("cfgSpeedLimit").value, 10) || 0) * 125000,
+    categories,
+  };
+  api("/api/config", { method: "POST", body: JSON.stringify(patch) })
+    .then((res) => { if (res.ok) fillSettings(res.config); });
+});
+
+(async function init() {
+  const state = await api("/api/status");
+  if (state.config) fillSettings(state.config);
+  render(state);
+  setInterval(poll, 1000);
+})();
+</script>
+</body>
+</html>
