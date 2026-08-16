@@ -67,7 +67,8 @@ sürebilir). Bu yüzden şu an için Python kaynağından kurulum önerilen yol.
 1. Chrome'da `chrome://extensions` adresine git
 2. Sağ üstten **Geliştirici modu**'nu aç
 3. **Paketlenmemiş öğe yükle** → bu depodaki `extension/` klasörünü seç
-   (ya da [Releases](../../releases) sayfasından `mini-idm-extension.zip`'i
+   (ya da [Releases](https://github.com/musayldrmm/downloadManager/releases)
+   sayfasından `mini-idm-extension.zip`'i
    indirip aç)
 4. `http://127.0.0.1:9614/` adresini Chrome'da bir kez aç — uzantı token'ı
    sayfadan otomatik okuyup kendini eşler, elle bir şey kopyalaman gerekmez
