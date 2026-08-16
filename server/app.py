@@ -17,6 +17,7 @@ import os
 import sys
 import threading
 import time
+import webbrowser
 
 import pystray
 import webview
@@ -76,6 +77,30 @@ def wait_until_ready(timeout=10):
     return False
 
 
+PAIR_MARKER = os.path.join(server.CONFIG_DIR, "browser_paired")
+
+
+def maybe_open_browser_for_pairing():
+    """
+    Chrome uzantisi token'i sadece 127.0.0.1:9614'u bir sekmede acinca
+    otomatik alabiliyor (content script sayfa DOM'undan okuyor). Kullanici
+    bunu elle yapmak zorunda kalmasin diye, sadece ILK calistirmada
+    varsayilan tarayicida bu adresi bir kez aciyoruz.
+    """
+    if os.path.exists(PAIR_MARKER):
+        return
+    try:
+        webbrowser.open(f"http://{server.HOST}:{server.PORT}/")
+    except Exception:
+        pass
+    try:
+        os.makedirs(server.CONFIG_DIR, exist_ok=True)
+        with open(PAIR_MARKER, "w") as f:
+            f.write("1")
+    except OSError:
+        pass
+
+
 def make_tray_icon():
     image = Image.open(ICON_PNG)
 
@@ -98,6 +123,7 @@ def main():
 
     threading.Thread(target=run_server, daemon=True).start()
     wait_until_ready()
+    maybe_open_browser_for_pairing()
 
     tray = make_tray_icon()
     threading.Thread(target=tray.run, daemon=True).start()
